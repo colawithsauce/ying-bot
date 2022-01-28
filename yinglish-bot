@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import json
-import base64
 from itsdangerous import base64_decode
 from yinglish import chs2yin
 from discord.ext import commands
@@ -18,18 +17,26 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    if message.author.bot:
+        return
+    if message.content.startswith(jdata['prefix']):
+        await bot.process_commands(message)
+        return
     channel = message.channel
+    print("get message {}".format(message.content))
     await channel.send(chs2yin(message.content, yin))
 
 
 @bot.command()
-async def sety(ctx, arg):
+async def set(ctx, arg):
+    print("get arguments {}".format(arg))
     try:
         if float(arg) > 0.0 and float(arg) < 1.0:
-            ctx.send("Set yin to {}".format(yin))
+            yin = float(arg)
+            await ctx.send(chs2yin(("〇乱度被设置成了 {}！！！".format(yin))))
         else:
-            ctx.send("Must be a float (0.0 - 1.0)")
+            await ctx.send(chs2yin("〇乱度必须是一个不大于1的小数！！！！！"))
     except:
-        ctx.send("Must be a float (0.0 - 1.0)")
+        await ctx.send(chs2yin("〇乱度必须是一个不大于1的小数！！！！！"))
 
-bot.run(base64_decode(jdata['token']))
+bot.run(base64_decode(jdata['token']).decode("utf-8").strip())
